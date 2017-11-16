@@ -1,5 +1,6 @@
 #include <vtkSmartPointer.h>
-#include <vtkSphereSource.h>
+//#include <vtkSphereSource.h>
+#include <vtkCubeSource.h>
 #include <vtkPolyData.h>
 #include <vtkTransform.h>
 #include <vtkTransformPolyDataFilter.h>
@@ -9,25 +10,32 @@
 #include <vtkRenderWindow.h>
 #include <vtkRenderer.h>
 #include <vtkRenderWindowInteractor.h>
+#include <vtkOrientationMarkerWidget.h>
+#include <vtkAxesActor.h>
 
 int main(int, char *[])
 {
   // Create the polydata geometry
-
+  #if 0
   vtkSmartPointer<vtkSphereSource> sphereSource =
     vtkSmartPointer<vtkSphereSource>::New();
   sphereSource->Update();
+  #endif
+
+  vtkSmartPointer<vtkCubeSource> CubeSource =
+    vtkSmartPointer<vtkCubeSource>::New();
+  CubeSource->Update();
 
   // Set up the actor to display the untransformed polydata
  
   vtkSmartPointer<vtkPolyDataMapper> originalMapper =
     vtkSmartPointer<vtkPolyDataMapper>::New();
-  originalMapper->SetInputConnection(sphereSource->GetOutputPort());
+  originalMapper->SetInputConnection(CubeSource->GetOutputPort());
 
   vtkSmartPointer<vtkActor> originalActor =
     vtkSmartPointer<vtkActor>::New();
   originalActor->SetMapper(originalMapper);
-  originalActor->GetProperty()->SetColor(1,0,0);
+  originalActor->GetProperty()->SetColor(0,1,0); //original[green]
 
   // Set up the transform filter
 
@@ -37,7 +45,7 @@ int main(int, char *[])
 
   vtkSmartPointer<vtkTransformPolyDataFilter> transformFilter =
     vtkSmartPointer<vtkTransformPolyDataFilter>::New();
-  transformFilter->SetInputConnection(sphereSource->GetOutputPort());
+  transformFilter->SetInputConnection(CubeSource->GetOutputPort());
   transformFilter->SetTransform(translation);
   transformFilter->Update();
 
@@ -50,24 +58,40 @@ int main(int, char *[])
   vtkSmartPointer<vtkActor> transformedActor =
     vtkSmartPointer<vtkActor>::New();
   transformedActor->SetMapper(transformedMapper);
-  transformedActor->GetProperty()->SetColor(0,1,0);
+  transformedActor->GetProperty()->SetColor(1,0,0); //target [red]
 
-  // Set up the rest of the visualization pipeline
-
+  //set up display framework
+  //Create a renderer, render window, and interactor
   vtkSmartPointer<vtkRenderer> renderer =
     vtkSmartPointer<vtkRenderer>::New();
-  renderer->AddActor(originalActor);
-  renderer->AddActor(transformedActor);
-  renderer->SetBackground(.3, .6, .3); // Set renderer's background color to green
-
-  vtkSmartPointer<vtkRenderWindow> renderWindow =
-    vtkSmartPointer<vtkRenderWindow>::New();
+  vtkSmartPointer<vtkRenderWindow> renderWindow = vtkSmartPointer<vtkRenderWindow>::New();
   renderWindow->AddRenderer(renderer);
+  renderWindow->SetSize( 1000, 800 );
 
   vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor =
     vtkSmartPointer<vtkRenderWindowInteractor>::New();
   renderWindowInteractor->SetRenderWindow(renderWindow);
 
+  //display axes
+  vtkSmartPointer<vtkAxesActor> axes =
+    vtkSmartPointer<vtkAxesActor>::New();
+
+  vtkSmartPointer<vtkOrientationMarkerWidget> widget = 
+    vtkSmartPointer<vtkOrientationMarkerWidget>::New();
+  widget->SetOutlineColor( 0.9300, 0.5700, 0.1300 );
+  widget->SetOrientationMarker( axes );
+  widget->SetInteractor( renderWindowInteractor );
+  widget->SetViewport( 0.0, 0.0, 0.5, 0.5 );
+  widget->SetEnabled( 1 );
+  widget->InteractiveOn();
+
+  // Set up the rest of the visualization pipeline
+
+  renderer->AddActor(originalActor);
+  renderer->AddActor(transformedActor);
+  renderer->SetBackground(.3, .6, .3); // Set renderer's background color to green
+
+  //start the pipeline
   renderWindowInteractor->Start();
   
   return EXIT_SUCCESS;
