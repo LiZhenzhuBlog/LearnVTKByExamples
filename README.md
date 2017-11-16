@@ -1,2 +1,3 @@
-# VTKWikiExamples
-This repository is DISCONTINUED. See https://github.com/lorensen/VTKExamples for the new examples.
+# Learn VTK by Examples
+https://github.com/perry-github/LearnVTKByExamples.
+
