@@ -26,6 +26,18 @@ namespace {
     void TranslatePolyData(vtkSmartPointer<vtkPolyData> polydata);
 }
 
+void OutputPoints(vtkSmartPointer<vtkPolyData> polydata)  {
+    for (vtkIdType i = 0; i < polydata->GetNumberOfPoints(); i++) {
+        double p[3];
+        polydata->GetPoint(i,p);
+        std::cout << std::fixed; 
+        std::cout << setprecision(2);
+        std::cout << std::left;
+        std::cout << setw(5); 
+        std::cout << "Point" << i <<  " = [ " << p[0] << ",  " << p[1] << ",  " << p[2] << "] " << std::endl;
+    }
+}
+
 int main(int argc, char *argv[])
 {
     vtkSmartPointer<vtkPolyData> source =
@@ -173,15 +185,6 @@ int main(int argc, char *argv[])
 
 namespace { // anonymous
 
-    #if dataPreparation
-    source  (4 points = origin + unit distance on xyz axis) [green]
-    ====>
-    target =  source * [0, .3, 0] [red]
-    ===> add noise [0, 0.1] to target
-    source + target == ICP ==> tranformation Matrix
-    source + icp->matrix   ==> solution (should pretty close to target points)
-    #endif
-
     void CreatePolyData(vtkSmartPointer<vtkPolyData> polydata)
     {
         // This function creates a set of 4 points (the origin and a point unit distance along each axis)
@@ -209,6 +212,9 @@ namespace { // anonymous
         vertexFilter->Update();
 
         polydata->ShallowCopy(vertexFilter->GetOutput());
+        std::cout << "source point data: " << std::endl;
+        OutputPoints(polydata);
+
     }
 
     void PerturbPolyData(vtkSmartPointer<vtkPolyData> polydata)
@@ -236,6 +242,8 @@ namespace { // anonymous
         }
 
         polydata->SetPoints(points);
+        std::cout << "target2 point data: " << std::endl;
+        OutputPoints(polydata);
 
     }
 
@@ -252,6 +260,58 @@ namespace { // anonymous
         transformFilter->Update();
 
         polydata->ShallowCopy(transformFilter->GetOutput());
+        std::cout << "target1 point data(y=y+0.3): " << std::endl;
+        OutputPoints(polydata);
     }
 
 } // end anonymous namespace
+
+#if dataPreparation
+source  (4 points = origin + unit distance on xyz axis) [green]
+====>
+target =  source * [0, .3, 0] [red]
+===> add noise [0, 0.1] to target
+source + target == ICP ==> tranformation Matrix
+source + icp->matrix   ==> solution (should pretty close to target points)
+#endif
+
+
+#if Analysis
+source point data: 
+Point0 = [ 0.00,  0.00,  0.00] 
+Point1 = [ 1.00,  0.00,  0.00] 
+Point2 = [ 0.00,  1.00,  0.00] 
+Point3 = [ 0.00,  0.00,  1.00] 
+
+target1 point data(y=y+0.3): 
+Point0 = [ 0.00,  0.30,  0.00] 
+Point1 = [ 1.00,  0.30,  0.00] 
+Point2 = [ 0.00,  1.30,  0.00] 
+Point3 = [ 0.00,  0.30,  1.00] 
+
+target2 point data: 
+Point0 = [ 0.10,  0.30,  0.00] 
+Point1 = [ 1.00,  0.40,  0.00] 
+Point2 = [ 0.00,  1.30,  0.10] 
+Point3 = [ 0.10,  0.30,  1.00] 
+
+The resulting matrix is: vtkMatrix4x4 (0x23eef20)
+     1.00 -0.07  0.03  0.06 
+     0.07  1.00 -0.05  0.32 
+    -0.03  0.05  1.00  0.02 
+     0.00  0.00  0.00  1.00 
+
+
+
+[ 0.00,  0.00,  0.00]      1.00 -0.07  0.03  0.06         [ 0.10,  0.30,  0.00] 
+[ 1.00,  0.00,  0.00]      0.07  1.00 -0.05  0.32    ==   [ 1.00,  0.40,  0.00] 
+[ 0.00,  1.00,  0.00]     -0.03  0.05  1.00  0.02         [ 0.00,  1.30,  0.10] 
+[ 0.00,  0.00,  1.00]      0.00  0.00  0.00  1.00         [ 0.10,  0.30,  1.00] 
+
+                           0.00  0.00  0.00  0.00           
+                           1.00  
+
+
+
+#endif
+
