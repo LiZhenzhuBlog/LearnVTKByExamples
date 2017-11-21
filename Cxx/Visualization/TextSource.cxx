@@ -38,7 +38,7 @@ int main(int, char *[])
 
   // Add the actor to the scene
   renderer->AddActor(actor);
-  renderer->SetBackground(1,1,1); // Background color white
+  renderer->SetBackground(0, 1, 1);// (1, 1, 1); // Background color white
 
   // Render and interact
   renderWindow->Render();
