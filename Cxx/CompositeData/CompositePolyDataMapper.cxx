@@ -39,7 +39,8 @@ int main( int argc, char *argv[] )
   // is index 0 and the blocks are flat indexes 1, 2 and 3.  This affects
   // the block returned by mbds->GetBlock(2).
   double color[] = {1, 0, 0};
-  cdsa->SetBlockColor(3, color);
+  //-cdsa->SetBlockColor(3, color);
+  cdsa->SetBlockColor((vtkPolyData*)3, color);
   
   mapper->SetCompositeDataDisplayAttributes(cdsa.Get());
   

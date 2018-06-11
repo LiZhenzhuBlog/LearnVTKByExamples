@@ -55,6 +55,7 @@ SET(NEEDS_ARGS
   ReadStructuredGrid
   ReadTIFF
   ReadTextFile
+  BoneSurface
   ReadUnknownTypeXMLFile
   ReadUnstructuredGrid
   SimplePointsReader
