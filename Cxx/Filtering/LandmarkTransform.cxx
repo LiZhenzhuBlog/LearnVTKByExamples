@@ -11,6 +11,7 @@
 #include <vtkProperty.h>
 #include <vtkTransformPolyDataFilter.h>
 #include <vtkVertexGlyphFilter.h>
+#include <vtkAxesActor.h>
 
 int main(int, char *[])
 {
@@ -119,6 +120,9 @@ int main(int, char *[])
   renderer->AddActor(targetActor);
   renderer->AddActor(solutionActor);
   renderer->SetBackground(.3, .6, .3); // Background color green
+
+  vtkSmartPointer<vtkAxesActor> axes = vtkSmartPointer<vtkAxesActor>::New();
+  renderer->AddActor(axes);
 
   // Render and interact
   renderWindow->Render();
